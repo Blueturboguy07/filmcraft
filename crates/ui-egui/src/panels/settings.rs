@@ -53,8 +53,28 @@ pub struct SettingsDraft {
     pub preset_message: String,
 }
 
+/// The AI page (`app.settings.ai`): drawn by `crate::ai`, listed after the engine's categories in
+/// the desktop app where AI is on. Its settings take effect at once, outside the draft.
+pub const AI_PAGE: &str = "ai";
+
+/// Whether this session has the AI page.
+#[cfg(not(target_arch = "wasm32"))]
+fn has_ai_page(app: &FilmcraftApp) -> bool {
+    app.ai.is_some()
+}
+
+#[cfg(target_arch = "wasm32")]
+fn has_ai_page(_: &FilmcraftApp) -> bool {
+    false
+}
+
 /// Open the dialog on a category page.
 pub fn open(app: &mut FilmcraftApp, page: &str) -> Result<Value, String> {
+    if page == AI_PAGE && has_ai_page(app) {
+        app.ui.settings = Some(SettingsDraft { page: AI_PAGE.into(), values: app.session.prefs.to_value(), ..Default::default() });
+        app.dialog = Some(Dialog::Preferences);
+        return Ok(json!({"dialog": "settings", "page": AI_PAGE}));
+    }
     let cat = settings::category(page).ok_or_else(|| format!("unknown settings category `{page}`"))?;
     app.ui.settings = Some(SettingsDraft { page: cat.id.into(), values: app.session.prefs.to_value(), ..Default::default() });
     app.dialog = Some(Dialog::Preferences);
@@ -859,35 +879,52 @@ pub fn show(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
         ui.add_space(14.0);
         ui.horizontal_top(|ui| {
             ui.add_space(20.0);
-            // category list
+            // category list (the AI page last, where AI is on)
             let (list, _) = ui.allocate_exact_size(vec2(LIST_W, BODY_H), Sense::hover());
             ui.painter().rect(list, 2.0, t.field_bg, Stroke::new(1.0, t.separator), egui::StrokeKind::Inside);
-            for (i, c) in settings::categories().iter().enumerate() {
+            let mut pages: Vec<(&str, &str)> = settings::categories().iter().map(|c| (c.id, c.title)).collect();
+            if has_ai_page(app) {
+                pages.push((AI_PAGE, "AI"));
+            }
+            for (i, (id, title)) in pages.into_iter().enumerate() {
                 let row = Rect::from_min_size(list.min + vec2(1.0, 1.0 + i as f32 * ROW_H), vec2(LIST_W - 2.0, ROW_H));
-                let r = ui.interact(row, egui::Id::new(("settings-cat", c.id)), Sense::click());
-                let sel = d.page == c.id;
+                let r = ui.interact(row, egui::Id::new(("settings-cat", id)), Sense::click());
+                let sel = d.page == id;
                 if sel {
                     ui.painter().rect_filled(row, 0.0, t.row_alt);
                 } else if r.hovered() {
                     ui.painter().rect_filled(row, 0.0, t.hover.gamma_multiply(0.6));
                 }
                 // a name too long for the list ends in "…" and shows whole in a tooltip
-                let title = crate::i18n::t(c.title);
+                let shown = crate::i18n::t(title);
                 let color = if sel { t.text } else { t.text_dim };
-                let mut job = egui::text::LayoutJob::simple_singleline(title.to_string(), Tokens::ui(12.5), color);
+                let mut job = egui::text::LayoutJob::simple_singleline(shown.to_string(), Tokens::ui(12.5), color);
                 job.wrap = egui::text::TextWrapping::truncate_at_width(row.width() - 16.0);
                 let galley = ui.painter().layout_job(job);
                 let elided = galley.elided;
                 ui.painter().galley(row.left_center() + vec2(8.0, -galley.size().y / 2.0), galley, color);
-                let r = if elided { r.on_hover_text(title) } else { r };
-                app.auto.add(&format!("settings.category.{}", c.id), row, c.title);
+                let r = if elided { r.on_hover_text(shown) } else { r };
+                app.auto.add(&format!("settings.category.{id}"), row, title);
                 if r.clicked() {
-                    d.page = c.id.into();
+                    d.page = id.into();
                     d.message.clear();
                 }
             }
             ui.add_space(20.0);
             // the page
+            #[cfg(not(target_arch = "wasm32"))]
+            if d.page == AI_PAGE {
+                ui.vertical(|ui| {
+                    ui.set_width(W - LIST_W - 60.0);
+                    ui.set_height(BODY_H);
+                    let page = egui::ScrollArea::vertical().id_salt(("settings-page", AI_PAGE)).auto_shrink([false, false]).max_height(BODY_H).show(ui, |ui| {
+                        ui.spacing_mut().item_spacing.y = 6.0;
+                        crate::ai::prefs_section(app, ui);
+                    });
+                    app.auto.add("settings.page", page.inner_rect, "AI");
+                });
+                return;
+            }
             let Some(cat) = settings::category(&d.page) else { return };
             ui.vertical(|ui| {
                 ui.set_width(W - LIST_W - 60.0);
@@ -909,7 +946,8 @@ pub fn show(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
             if button(app, ui, "settings.help", tl!("Help"), false) {
                 crate::links::open(app, ctx, &format!("{}/blob/main/docs/project-files.md#settings", crate::links::GITHUB));
             }
-            if button(app, ui, "settings.reset", tl!("Reset…"), false) {
+            // (the AI page keeps no preferences in the draft: nothing to reset there)
+            if button(app, ui, "settings.reset", tl!("Reset…"), false) && d.page != AI_PAGE {
                 // this category back to its defaults (OK applies it)
                 let defaults = filmcraft_engine::autosave::Preferences::default().to_value();
                 let keep = get(&d.values, "general.recentProjects").clone();

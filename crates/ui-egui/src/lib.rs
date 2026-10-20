@@ -29,6 +29,9 @@ macro_rules! tlf {
     };
 }
 
+/// AI through publik API or the person's own key (Sequence ▸ AI, Preferences ▸ AI): desktop only.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ai;
 pub mod automation;
 pub mod brand;
 pub mod calc;
@@ -392,6 +395,11 @@ pub struct FilmcraftApp {
     pub workspaces: dock::WorkspacePrefs,
     /// Workspace names and the current one, as last handed to the native menu.
     menu_workspaces: (Vec<String>, String),
+    /// AI through publik API or the person's own key (Sequence ▸ AI, Preferences ▸ AI). `None`
+    /// until the desktop app installs it, and in tests, scripts and the browser build, where no
+    /// setup window may appear and nothing may be sent.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub ai: Option<ai::Ai>,
 }
 
 pub struct GpuState {
@@ -611,6 +619,8 @@ impl FilmcraftApp {
             workspace_restored: false,
             workspaces,
             menu_workspaces: Default::default(),
+            #[cfg(not(target_arch = "wasm32"))]
+            ai: None,
         }
     }
 
@@ -1799,6 +1809,9 @@ impl FilmcraftApp {
         self.apply_prefs(&ctx);
         #[cfg(not(target_arch = "wasm32"))]
         self.tick_media_refresh(&ctx);
+        // AI requests that came back are placed; the first launch asks how to set AI up.
+        #[cfg(not(target_arch = "wasm32"))]
+        ai::frame(self, &ctx);
         for ev in self.session.drain_events() {
             match ev {
                 filmcraft_engine::Event::OpenSequence(_) => {

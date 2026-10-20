@@ -251,6 +251,14 @@ pub fn invoke(app: &mut FilmcraftApp, ctx: &egui::Context, id: &str, mut params:
         // the engine's counters plus playback, frame workers and UI timings
         return Ok(crate::perf::stats(app));
     }
+    // Sequence ▸ AI: the items open their windows; nothing is sent from here
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(r) = crate::ai::route(app, id) {
+        if let Err(e) = &r {
+            app.ui.status = e.clone();
+        }
+        return r;
+    }
     if let Some(result) = crate::dock_ui::route(app, ctx, id, &params) {
         return result;
     }
@@ -713,6 +721,8 @@ pub fn menu_items(app: &FilmcraftApp) -> Vec<MenuItem> {
     }
     crate::panels::workspaces::menu(app, &mut v);
     open_recent(&mut v, &app.session, |n| app.ui.language.tr(n).to_string());
+    #[cfg(not(target_arch = "wasm32"))]
+    crate::ai::menu_items(app, &mut v);
     v
 }
 

@@ -38,6 +38,15 @@ unicode-bidi = "0.3.18"
 # ArtCraft wordmark (PNG) for the About dialog and Home screen.
 image = { version = "0.25", default-features = false, features = ["png"] }
 
+# Sequence ▸ AI (desktop only): publik API as the zero-setup AI option, or the person's own key.
+# craft-publik holds provisioning, the credential file, the calls and the setup flow; it talks to the
+# network through the system's curl, only after the person sets it up and clicks. The AAC encoder
+# and the MP4 writer pack the audio a transcription sends (16 kHz mono AAC in an .m4a).
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+craft-publik = { path = "../../../craft-publik", features = ["egui"] }
+filmcraft-aac = { workspace = true }
+filmcraft-isobmff = { workspace = true }
+
 # Thread/process CPU clocks for frame-job profiling (safe wrappers; see frames.rs).
 [target.'cfg(unix)'.dependencies]
 rustix = { version = "1", default-features = false, features = ["std", "time"] }
