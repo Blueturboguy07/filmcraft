@@ -13,7 +13,7 @@
   <key>CFBundleExecutable</key>
   <string>FilmCraft</string>
   <key>CFBundleIdentifier</key>
-  <string>ai.storyteller.filmcraft</string>
+  <string>com.publik.filmcraft</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundlePackageType</key>
