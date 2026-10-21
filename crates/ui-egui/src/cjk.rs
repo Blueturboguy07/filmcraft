@@ -78,6 +78,12 @@ pub(crate) fn install(fonts: &mut FontDefinitions) {
     }
 }
 
+/// Whether `name` is an installed Chinese or Korean system face added by [`install`].
+#[cfg(test)]
+pub(crate) fn is_system_face(name: &str) -> bool {
+    name == "system-chinese" || name == "system-korean"
+}
+
 fn install_chinese(fonts: &mut FontDefinitions) {
     let chinese: Vec<_> = craft_fonts().collect();
     if chinese.is_empty() {
