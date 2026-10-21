@@ -43,7 +43,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 # network through the system's curl, only after the person sets it up and clicks. The AAC encoder
 # and the MP4 writer pack the audio a transcription sends (16 kHz mono AAC in an .m4a).
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-craft-publik = { path = "../../../craft-publik", features = ["egui"] }
+craft-publik = { git = "https://github.com/Blueturboguy07/craft-publik", rev = "1da0e89298f3552a5e74d1e8b47d865028e13580", features = ["egui"] }
 filmcraft-aac = { workspace = true }
 filmcraft-isobmff = { workspace = true }
 
