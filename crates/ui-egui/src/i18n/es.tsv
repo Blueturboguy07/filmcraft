@@ -179,7 +179,6 @@
 	Insert Frame Hold Segment	Insertar segmento de fotograma congelado
 	Install Motion Graphics Template…	Instalar plantilla de animación…
 	Interpret Footage…	Interpretar material…
-	Join the ArtCraft Discord…	Únete al Discord de ArtCraft…
 	Keyboard Shortcuts…	Atajos de teclado…
 	Label	Etiqueta
 	Labels…	Etiquetas…
@@ -374,7 +373,6 @@
 	Master volume: use the Audio Track Mixer	Volumen maestro: usa el mezclador de pistas de audio
 	Search	Buscar
 	Quick Export	Exportación rápida
-	Join the ArtCraft Discord (discord.gg/artcraft)	Únete al Discord de ArtCraft (discord.gg/artcraft)
 	Cancel	Cancelar
 	OK	Aceptar
 	Interpret Footage	Interpretar material
@@ -418,7 +416,6 @@
 	Delete Empty Caption Tracks	Eliminar pistas de subtítulos vacías
 	Version {version}	Versión {version}
 	A clean-room, pure-Rust non-linear video editor. Part of the ArtCraft family.	Un editor de video no lineal en Rust puro, desarrollado en sala limpia. Parte de la familia ArtCraft.
-	Join the ArtCraft Discord	Únete al Discord de ArtCraft
 	Source code on GitHub	Código fuente en GitHub
 	Report an issue	Informar de un problema
 	MIT OR Apache-2.0. Fonts: Inter, Noto Serif and JetBrains Mono (SIL OFL 1.1).	MIT OR Apache-2.0. Fuentes: Inter, Noto Serif y JetBrains Mono (SIL OFL 1.1).
@@ -459,7 +456,6 @@
 	Bars and Tone	Barras y tono
 	SMPTE HD bars with 1 kHz reference tone	Barras SMPTE HD con tono de referencia de 1 kHz
 	Community	Comunidad
-	Join us on Discord	Únete a nosotros en Discord
 	OMF Export Settings	Ajustes de exportación OMF
 	AAF Export Settings	Ajustes de exportación AAF
 	OMF Title:	Título OMF:

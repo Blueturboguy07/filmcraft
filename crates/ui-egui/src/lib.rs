@@ -165,8 +165,7 @@ pub struct HostHooks {
     /// running while the dialog is open (the desktop app on Linux, #260); without it the
     /// synchronous pickers above are used.
     pub run_dialog: Option<Box<dyn FnMut(native_dialogs::FileDialog) -> Receiver<Vec<String>>>>,
-    /// Open a URL in the system browser (Help menu links, About dialog, Discord button, Import
-    /// screen). Without it, or when it fails, links go through `egui::Context::open_url`, which
+    /// Open a URL in the system browser (Help menu links, About dialog, Import screen). Without it, or when it fails, links go through `egui::Context::open_url`, which
     /// opens a new tab on the web (the native egui backend is built without its `links` feature).
     pub open_url: Option<Box<dyn FnMut(&str) -> Result<(), String>>>,
     /// The operating system's light or dark appearance when egui cannot report it (Linux desktops

@@ -201,7 +201,6 @@
 	Install Motion Graphics Template…	Motion-Graphics-Vorlage installieren…
 	Interpret Footage…	Material interpretieren…
 	Iris	Iris
-	Join the ArtCraft Discord…	Dem ArtCraft-Discord beitreten…
 	Keyboard Shortcuts…	Tastenkürzel…
 	Label	Farbmarkierung
 	Labels…	Farbmarkierungen…
@@ -411,7 +410,6 @@
 	Master volume: use the Audio Track Mixer	Gesamtlautstärke: über das Audiospur-Mischpult
 	Search	Suchen
 	Quick Export	Schnellexport
-	Join the ArtCraft Discord (discord.gg/artcraft)	Dem ArtCraft-Discord beitreten (discord.gg/artcraft)
 	Cancel	Abbrechen
 	OK	OK
 	Interpret Footage	Material interpretieren
@@ -455,7 +453,6 @@
 	Delete Empty Caption Tracks	Leere Untertitelspuren löschen
 	Version {version}	Version {version}
 	A clean-room, pure-Rust non-linear video editor. Part of the ArtCraft family.	Ein nichtlinearer Videoeditor in reinem Rust, im Clean-Room-Verfahren entwickelt. Teil der ArtCraft-Familie.
-	Join the ArtCraft Discord	Dem ArtCraft-Discord beitreten
 	Source code on GitHub	Quellcode auf GitHub
 	Report an issue	Problem melden
 	MIT OR Apache-2.0. Fonts: Inter, Noto Serif and JetBrains Mono (SIL OFL 1.1).	MIT OR Apache-2.0. Schriften: Inter, Noto Serif und JetBrains Mono (SIL OFL 1.1).
@@ -496,7 +493,6 @@
 	Bars and Tone	Farbbalken und Ton
 	SMPTE HD bars with 1 kHz reference tone	SMPTE-HD-Farbbalken mit 1-kHz-Referenzton
 	Community	Community
-	Join us on Discord	Komm zu uns auf Discord
 	OMF Export Settings	OMF-Exporteinstellungen
 	AAF Export Settings	AAF-Exporteinstellungen
 	OMF Title:	OMF-Titel:

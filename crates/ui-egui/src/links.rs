@@ -1,13 +1,11 @@
-//! Community and project links (Help menu, About dialog, header Discord button, Home screen).
+//! Community and project links (Help menu, About dialog, Home screen).
 //!
-//! FilmCraft is part of the ArtCraft family: the community lives on the ArtCraft Discord, every
-//! app has a page on the ArtCraft website and a public GitHub repository.
+//! FilmCraft is part of the ArtCraft family: every app has a page on the ArtCraft website and a
+//! public GitHub repository.
 
 /// The app's short name, used in the website and repository URLs.
 pub const APP: &str = "filmcraft";
 
-/// The ArtCraft community Discord.
-pub const DISCORD: &str = "https://discord.gg/artcraft";
 /// The ArtCraft website.
 pub const WEBSITE: &str = "https://publikhq.com/adobe";
 /// FilmCraft's page on the ArtCraft website.
@@ -18,8 +16,7 @@ pub const GITHUB: &str = "https://github.com/Blueturboguy07/filmcraft";
 pub const ISSUES: &str = "https://github.com/Blueturboguy07/filmcraft/issues";
 
 /// (command id, label, url) for every link, in menu order.
-pub const ALL: [(&str, &str, &str); 5] = [
-    ("help.discord", "Join the ArtCraft Discord…", DISCORD),
+pub const ALL: [(&str, &str, &str); 4] = [
     ("help.website", "ArtCraft Website", WEBSITE),
     ("help.appPage", "FilmCraft on publikhq.com", APP_PAGE),
     ("help.github", "FilmCraft on GitHub", GITHUB),
@@ -129,13 +126,13 @@ mod tests {
         assert_eq!(APP_PAGE, format!("{WEBSITE}/apps/{APP}"));
         assert_eq!(GITHUB, format!("https://github.com/Blueturboguy07/{APP}"));
         assert!(ALL.iter().all(|(id, _, u)| id.starts_with("help.") && u.starts_with("https://")));
-        assert_eq!(url_for("help.discord"), Some(DISCORD));
+        assert_eq!(url_for("help.github"), Some(GITHUB));
         assert_eq!(url_for("help.nope"), None);
     }
 
     #[test]
     fn links_open_through_the_host_hook() {
-        // #642: on the desktop every link (Help menu, About, Discord button, Import screen) must
+        // #642: on the desktop every link (Help menu, About, Import screen) must
         // reach the host's browser opener; `ctx.open_url` alone is a no-op natively.
         use std::cell::RefCell;
         use std::rc::Rc;
@@ -152,8 +149,8 @@ mod tests {
             assert_eq!(r["url"], url, "{id}");
             assert_eq!(opened.borrow().last().map(String::as_str), Some(url), "{id}");
         }
-        open(&mut app, &ctx, DISCORD);
-        assert_eq!(opened.borrow().last().map(String::as_str), Some(DISCORD));
+        open(&mut app, &ctx, WEBSITE);
+        assert_eq!(opened.borrow().last().map(String::as_str), Some(WEBSITE));
         assert_eq!(opened.borrow().len(), ALL.len() + 1);
 
         // A failing opener falls back to `ctx.open_url` instead of losing the click.
