@@ -14,7 +14,7 @@ section: video
 priority: optional
 maintainer: ${FILMCRAFT_MAINTAINER}
 vendor: Learning Machines LLC
-homepage: https://getartcraft.com/apps/filmcraft
+homepage: https://publikhq.com/filmcraft
 license: MIT OR Apache-2.0
 description: |-
   Open-source, native video editor: edit video, color and sound.
