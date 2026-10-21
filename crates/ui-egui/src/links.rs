@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn urls_follow_the_artcraft_scheme() {
-        assert_eq!(APP_PAGE, format!("{WEBSITE}/apps/{APP}"));
+        assert_eq!(APP_PAGE, format!("https://publikhq.com/{APP}"));
         assert_eq!(GITHUB, format!("https://github.com/Blueturboguy07/{APP}"));
         assert!(ALL.iter().all(|(id, _, u)| id.starts_with("help.") && u.starts_with("https://")));
         assert_eq!(url_for("help.github"), Some(GITHUB));
