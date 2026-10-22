@@ -39,6 +39,10 @@ esac
 export MACOSX_DEPLOYMENT_TARGET=11.0
 IDENTITY="${MACOS_SIGN_IDENTITY:--}"
 SHORT_VERSION="${VERSION%%-*}"
+# publik's build number (packaging/PUBLIK_BUILD, or PUBLIK_BUILD in the environment) marks the
+# bundle's <App>Version as X.Y.Z+publik.N, so the launcher knows which build is installed.
+PUBLIK_BUILD="${PUBLIK_BUILD:-$(tr -d '[:space:]' < "$HERE/../PUBLIK_BUILD" 2>/dev/null || true)}"
+FULL_VERSION="$VERSION${PUBLIK_BUILD:+"+publik.$PUBLIK_BUILD"}"
 WORK="$CARGO_TARGET_DIR/macos-package"
 APP="$WORK/FilmCraft.app"
 DMG="$DIST/filmcraft-$VERSION-macos-$ARCH.dmg"
@@ -112,7 +116,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Executable and icon carry the display name (CFBundleExecutable / CFBundleIconFile).
 cp "$WORK/bin/filmcraft" "$APP/Contents/MacOS/FilmCraft"
 cp "$ROOT/assets/app-icon/filmcraft.icns" "$APP/Contents/Resources/FilmCraft.icns"
-sed -e "s/@VERSION@/$VERSION/g" -e "s/@SHORT_VERSION@/$SHORT_VERSION/g" \
+sed -e "s/@VERSION@/$FULL_VERSION/g" -e "s/@SHORT_VERSION@/$SHORT_VERSION/g" \
   -e "s/@BUILD_SHA@/${FILMCRAFT_BUILD_SHA:-unknown}/g" \
   "$HERE/Info.plist.in" >"$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
