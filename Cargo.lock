@@ -1845,6 +1845,7 @@ dependencies = [
  "filmcraft-time",
  "serde_json",
  "tokio",
+ "ureq 2.12.1",
 ]
 
 [[package]]

@@ -18,6 +18,8 @@ default = []
 whisper = ["filmcraft-engine/whisper", "filmcraft-engine/speech-download"]
 
 [dependencies]
+# publik's usage counts (src/publik_telemetry.rs): the HTTP client that file needs.
+ureq = "2"
 filmcraft-engine = { workspace = true }
 filmcraft-export = { workspace = true }
 filmcraft-project = { workspace = true }

@@ -449,7 +449,8 @@ publik's build of FilmCraft sends two anonymous usage events to publik: `app_ope
 and `active_session` (every 30 minutes while the app runs). An event holds the app name, the app
 version, the operating system, the CPU type and a random install ID. It holds no file, no file name
 and no prompt. When this computer has a publik API key for FilmCraft, the event carries that key, so publik
-counts the account one time. The `filmcraft-cli` tool sends nothing. To turn it off, set `DO_NOT_TRACK=1`
+counts the account one time. The `filmcraft-cli` tool sends the same events, at most one `app_opened` in 10 minutes and none for
+`--version` or `--help`; a detached copy of the tool does the send, so the tool does not wait. To turn it off, set `DO_NOT_TRACK=1`
 in the environment. Details: https://publikhq.com/skills/telemetry.md
 
 ## License and credits
