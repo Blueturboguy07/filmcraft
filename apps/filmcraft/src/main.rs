@@ -36,6 +36,9 @@ mod logging;
 #[cfg(target_os = "macos")]
 mod native_menu;
 mod window_raise;
+// publik's usage counts (README: Usage counts). The file is publik's reference client, kept as it is.
+#[rustfmt::skip]
+mod publik_telemetry;
 
 use args::{Cli, Launch};
 use chrono::TimeZone;
@@ -90,6 +93,12 @@ fn tell(text: &str, error: bool) {
     }
 }
 
+/// The version in publik's usage counts: the release tag without its `v`, for example `0.9.0-publik.4`.
+/// The build number comes from `packaging/PUBLIK_BUILD`, the file the bundle version comes from.
+fn publik_version() -> String {
+    format!("{}-publik.{}", env!("CARGO_PKG_VERSION"), include_str!("../../../packaging/PUBLIK_BUILD").trim())
+}
+
 fn main() -> eframe::Result {
     // Builder check (publikhq.com/skills/setup.md): the built app provisions publik API for real
     // and prints one line. The builder who runs it is the consent. Before anything else, so the
@@ -120,6 +129,9 @@ fn main() -> eframe::Result {
     let data_root = launch.data_dir.clone().or_else(default_data_dir);
     let log_dir = data_root.as_ref().map(|d| d.join(logging::LOG_DIR));
     log::info!("FilmCraft {} ({} {})", env!("CARGO_PKG_VERSION"), std::env::consts::OS, std::env::consts::ARCH);
+    // publik's usage counts: `app_opened` now, `active_session` every 30 minutes, on a background
+    // thread. After the early exits above, so `--version` and the self-test send nothing.
+    publik_telemetry::start("filmcraft", &publik_version(), None);
     // The log file lives next to the crash logs; opened after the arguments, so `--help`,
     // `--version` and usage errors leave no file behind. Records logged until now go in first.
     if let Some(logger) = logger {
