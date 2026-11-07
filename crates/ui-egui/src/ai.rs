@@ -913,7 +913,7 @@ fn setup_window(app: &mut FilmcraftApp, ctx: &egui::Context) {
     let mut open = true;
     let mut action = Action::None;
     let resp = egui::Window::new("Set Up AI")
-        .id(egui::Id::new("ai-setup"))
+        .id(egui::Id::unique("ai-setup"))
         .open(&mut open)
         .collapsible(false)
         .resizable(false)
@@ -999,7 +999,7 @@ fn transcribe_window(app: &mut FilmcraftApp, ctx: &egui::Context) {
     let mut open = true;
     let mut chosen: Option<Source> = None;
     let resp = egui::Window::new("Transcribe to Captions")
-        .id(egui::Id::new("ai-transcribe"))
+        .id(egui::Id::unique("ai-transcribe"))
         .open(&mut open)
         .collapsible(false)
         .resizable(false)
@@ -1133,7 +1133,7 @@ fn voice_window(app: &mut FilmcraftApp, ctx: &egui::Context) {
     let mut elems: Elems = Vec::new();
     let mut open = true;
     let resp = egui::Window::new("Voice-over from Text")
-        .id(egui::Id::new("ai-voiceover"))
+        .id(egui::Id::unique("ai-voiceover"))
         .open(&mut open)
         .collapsible(false)
         .resizable(false)
@@ -1156,12 +1156,12 @@ fn voice_window(app: &mut FilmcraftApp, ctx: &egui::Context) {
             ui.add_space(8.0);
             ui.label("Text");
             let edit = egui::TextEdit::multiline(&mut ai.text)
-                .id(egui::Id::new("ai-voiceover-text"))
+                .id(egui::Id::unique("ai-voiceover-text"))
                 .hint_text("Welcome back. In this part, we look at the first results.")
                 .desired_rows(5)
                 .desired_width(f32::INFINITY)
                 .char_limit(MAX_SPEECH_CHARS);
-            let r = ui.add_enabled(!busy && !waiting, edit);
+            let r = crate::widgets::accessible_name(ui.add_enabled(!busy && !waiting, edit), "Text");
             elems.push(("ai.voiceover.text".into(), r.rect, "Text".into()));
             let chars = ai.text.trim().chars().count();
             dim(ui, &format!("{chars} of {MAX_SPEECH_CHARS} characters."));
