@@ -38,7 +38,12 @@ pub fn url_for(command: &str) -> Option<&'static str> {
 /// What a Help menu item does, shown when the pointer rests on it: just the address a link opens
 /// in the web browser, or what an item that stays inside FilmCraft does.
 pub fn menu_hint(command: &str) -> Option<String> {
-    let url = if command == "help.filmcraftHelp" { Some(crate::panels::keyboard::HELP_URL) } else { url_for(command) };
+    // publik's build: Check for Updates… opens publik's listing (updates_ui::check), so its hint is that address.
+    let url = match command {
+        "help.filmcraftHelp" => Some(crate::panels::keyboard::HELP_URL),
+        "app.checkForUpdates" => Some(APP_PAGE),
+        _ => url_for(command),
+    };
     if let Some(url) = url {
         return Some(url.to_string());
     }
@@ -216,6 +221,8 @@ mod tests {
             assert_eq!(menu_hint(id).as_deref(), Some(url), "{id}");
         }
         assert_eq!(menu_hint("help.filmcraftHelp").as_deref(), Some(crate::panels::keyboard::HELP_URL));
+        // publik's build: Check for Updates… opens publik's listing, so it shows that address too
+        assert_eq!(menu_hint("app.checkForUpdates").as_deref(), Some(APP_PAGE));
         let help_items: Vec<String> = crate::menus::menu_items(&crate::FilmcraftApp::new(filmcraft_engine::Session::default()))
             .into_iter()
             .filter(|it| it.path.first().map(String::as_str) == Some("Help"))
@@ -224,7 +231,7 @@ mod tests {
         assert!(help_items.len() >= ALL.len() + 3, "{help_items:?}");
         for id in &help_items {
             let hint = menu_hint(id).unwrap_or_else(|| panic!("{id} has no hover hint"));
-            let link = url_for(id).is_some() || id == "help.filmcraftHelp";
+            let link = url_for(id).is_some() || id == "help.filmcraftHelp" || id == "app.checkForUpdates";
             assert_eq!(hint.starts_with("https://"), link, "{id}: {hint}");
         }
         assert_eq!(menu_hint("edit.undo"), None);

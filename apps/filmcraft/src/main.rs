@@ -316,7 +316,10 @@ fn app_creator(launch: Launch, graphics: graphics::GraphicsStart, created: Arc<A
             }
             app.ai = Some(ai);
         }
-        app.set_startup_update_check(true);
+        // publik's build: no check at start. craft-update looks at storytold's GitHub releases and
+        // would offer to replace this build with one that is not publik's. Help ▸ Check for Updates…
+        // opens publik's listing instead (filmcraft_ui_egui::updates_ui::check).
+        app.set_startup_update_check(false);
         app.graphics_notice = notice;
         if recover == Some(false) {
             app.dialog = None;

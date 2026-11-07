@@ -47,18 +47,18 @@ impl FilmcraftApp {
     }
 }
 
-pub(crate) fn check(app: &mut FilmcraftApp) -> Result<Value, String> {
+pub(crate) fn check(app: &mut FilmcraftApp, ctx: &egui::Context) -> Result<Value, String> {
+    // publik's build: Help ▸ Check for Updates… opens publik's listing, where publik's builds are.
+    // It never checks storytold's GitHub releases, so it never offers to replace this build with
+    // one that is not publik's (the check at start is off too: apps/filmcraft/src/main.rs).
     #[cfg(not(target_arch = "wasm32"))]
     {
-        app.updates_rt.check_requested = true;
-        app.updates_rt.manual_window_open = true;
-        if let Some(ctx) = &app.updates_rt.repaint {
-            ctx.request_repaint();
-        }
+        crate::links::open(app, ctx, crate::links::APP_PAGE);
         Ok(Value::Null)
     }
     #[cfg(target_arch = "wasm32")]
     {
+        let _ = ctx;
         app.updates_rt.manual_window_open = true;
         Ok(Value::Null)
     }

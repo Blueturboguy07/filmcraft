@@ -504,7 +504,7 @@ pub fn invoke_command(app: &mut FilmcraftApp, ctx: &egui::Context, id: &str, mut
             return Ok(Value::Null);
         }
         "app.checkForUpdates" => {
-            let _ = crate::updates_ui::check(app);
+            let _ = crate::updates_ui::check(app, ctx);
             return Ok(serde_json::Value::Null);
         }
         "app.about" => {
