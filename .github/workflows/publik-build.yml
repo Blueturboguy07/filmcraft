@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: storytold/craft-fonts
-          ref: abb83316d96aa59c1cf64784289e378fe9fa5695
+          ref: b076417b5880bd4154bd22f00695b1d28c6bea83
           path: craft-fonts
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
@@ -47,6 +47,16 @@ jobs:
         with:
           key: publik-build-macos-universal
           cache-on-failure: true
+      - name: Cargo.lock matches the manifests
+        run: cargo metadata --locked --format-version 1 > /dev/null
+      - name: Tests of publik's changes (AI, links, update check)
+        # Sequence > AI (crate::ai: captions from speech, voice-over from text, the first-run
+        # question), publik's links and Help > Check for Updates (publik's listing, no check of
+        # storytold's releases). The job stops here if a port to a newer upstream broke them.
+        # Nothing leaves the runner: the AI tests call no service.
+        run: |
+          cargo test --locked -p filmcraft-ui-egui --lib -- \
+            ai::tests:: links::tests:: updates_ui::tests::
       - name: Build and package (ad-hoc signature, no notarization)
         run: |
           # The short commit, as publik's earlier builds carry it (<APP>_BUILD_SHA).
@@ -76,7 +86,7 @@ jobs:
             echo "commit=$(git rev-parse HEAD)"
             echo "build_sha=$(git rev-parse --short HEAD)"
             echo "publik_build=$(tr -d '[:space:]' < packaging/PUBLIK_BUILD)"
-            echo "fonts_ref=abb83316d96aa59c1cf64784289e378fe9fa5695"
+            echo "fonts_ref=b076417b5880bd4154bd22f00695b1d28c6bea83"
             echo "runner=$(sw_vers -productName) $(sw_vers -productVersion) $(uname -m)"
             echo "rustc=$(rustc -V)"
             echo "cargo=$(cargo -V)"
