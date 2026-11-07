@@ -20,6 +20,8 @@ concurrency:
 
 jobs:
   release:
+    # publik's builds are signed and published from publik's Mac: never for a v*-publik.* ref.
+    if: ${{ !contains(github.ref, '-publik') }}
     # publik's trimmed copy of storytold/craft-common-actions (free macOS runner, Windows x64 only,
     # Linux and Flatpak off). Tracked at @main like upstream.
     uses: Blueturboguy07/craft-common-actions/.github/workflows/release.yml@main
