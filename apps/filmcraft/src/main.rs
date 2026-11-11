@@ -39,9 +39,9 @@ mod native_color;
 #[cfg(target_os = "macos")]
 mod native_menu;
 mod window_raise;
-// publik's usage counts (README: Usage counts). The file is publik's reference client, kept as it is.
-#[rustfmt::skip]
-mod publik_telemetry;
+// Sign in with publik, usage counting and the AI pay choice: this build's publik facts and the
+// gate every publik app opens with.
+mod publik;
 
 use args::{Cli, Launch};
 use chrono::TimeZone;
@@ -55,17 +55,26 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// Reverse-DNS app id: Linux `.desktop` file, hicolor icon name and Wayland app id.
 const APP_ID: &str = "ai.storyteller.filmcraft";
 
-/// What publik needs to know about this build. The app token is public by design (it can only mint
-/// capped keys attributed to FilmCraft) and lives at the repository root, so source builds carry
-/// it. AI settings (`ai.json`) go in `config_dir`, the data folder that holds `preferences.json`.
-fn app_info(config_dir: Option<std::path::PathBuf>) -> filmcraft_ui_egui::ai::AppInfo {
-    filmcraft_ui_egui::ai::AppInfo {
-        slug: "filmcraft",
-        name: "FilmCraft",
-        version: env!("CARGO_PKG_VERSION"),
-        app_token: include_str!("../../../publik-app-token.txt"),
-        dialects: &["audio_transcriptions", "audio_speech"],
-        config_dir,
+/// The app and the publik gate, which draws itself before anything of FilmCraft until it passes.
+struct App(FilmcraftApp, craft_publik::ui::Gate);
+
+impl eframe::App for App {
+    fn raw_input_hook(&mut self, ctx: &egui::Context, raw_input: &mut egui::RawInput) {
+        eframe::App::raw_input_hook(&mut self.0, ctx, raw_input);
+    }
+    fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        eframe::App::logic(&mut self.0, ctx, frame);
+    }
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        // Sign in with publik comes first: the gate draws itself until the person is signed in
+        // (and, the first time, has chosen how the app pays for AI). Nothing of the app shows before.
+        if !self.1.ui(ui) {
+            return;
+        }
+        eframe::App::ui(&mut self.0, ui, frame);
+    }
+    fn on_exit(&mut self) {
+        eframe::App::on_exit(&mut self.0);
     }
 }
 
@@ -96,12 +105,6 @@ fn tell(text: &str, error: bool) {
     }
 }
 
-/// The version in publik's usage counts: the release tag without its `v`, for example `0.9.0-publik.4`.
-/// The build number comes from `packaging/PUBLIK_BUILD`, the file the bundle version comes from.
-fn publik_version() -> String {
-    format!("{}-publik.{}", env!("CARGO_PKG_VERSION"), include_str!("../../../packaging/PUBLIK_BUILD").trim())
-}
-
 fn main() -> eframe::Result {
     // Windows: the update helper is a copy of this program started with `--finish-update`.
     #[cfg(windows)]
@@ -112,7 +115,7 @@ fn main() -> eframe::Result {
     // and prints one line. The builder who runs it is the consent. Before anything else, so the
     // check opens no window and leaves no log file.
     if std::env::var_os("PUBLIK_SELF_TEST").is_some() {
-        println!("{}", filmcraft_ui_egui::ai::self_test(&app_info(default_data_dir())));
+        println!("{}", craft_publik::self_test(&publik::app_info(default_data_dir())));
         return Ok(());
     }
     // First, so the panic hook and every start-up record are logged (`logging`).
@@ -137,9 +140,9 @@ fn main() -> eframe::Result {
     let data_root = launch.data_dir.clone().or_else(default_data_dir);
     let log_dir = data_root.as_ref().map(|d| d.join(logging::LOG_DIR));
     log::info!("FilmCraft {} ({} {})", env!("CARGO_PKG_VERSION"), std::env::consts::OS, std::env::consts::ARCH);
-    // publik's usage counts: `app_opened` now, `active_session` every 30 minutes, on a background
-    // thread. After the early exits above, so `--version` and the self-test send nothing.
-    publik_telemetry::start("filmcraft", &publik_version(), None);
+    // publik's usage counts (`app_opened` now, `active_session` every 30 minutes) start once the
+    // gate passed (`publik::app_info`, `craft_publik::ui::Gate`), so `--version` and the self-test
+    // send nothing.
     // The log file lives next to the crash logs; opened after the arguments, so `--help`,
     // `--version` and usage errors leave no file behind. Records logged until now go in first.
     if let Some(logger) = logger {
@@ -310,7 +313,7 @@ fn app_creator(launch: Launch, graphics: graphics::GraphicsStart, created: Arc<A
         // menu has the AI items. The setup window stays closed while an agent drives the app over
         // `--control`.
         if let Some(dir) = data_dir.clone().or_else(default_data_dir) {
-            let mut ai = filmcraft_ui_egui::ai::Ai::new(app_info(Some(dir)));
+            let mut ai = filmcraft_ui_egui::ai::Ai::new(publik::app_info(Some(dir)));
             if control_port.is_some() {
                 ai.skip_first_run();
             }
@@ -426,7 +429,11 @@ fn app_creator(launch: Launch, graphics: graphics::GraphicsStart, created: Arc<A
             // From here the app drains the queue on its first pass: stop rejecting requests.
             ready.store(true, Ordering::Relaxed);
         }
-        Ok(Box::new(app))
+        Ok(Box::new(App(
+            app,
+            // Sign in with publik: provisioning starts now, on a worker thread; `ui` draws it.
+            craft_publik::ui::Gate::new(publik::app_info(data_dir.clone().or_else(default_data_dir))),
+        )))
     })
 }
 

@@ -18,8 +18,9 @@ whisper = ["filmcraft-engine/whisper", "filmcraft-engine/speech-download"]
 neural-voices = ["filmcraft-engine/neural-voices"]
 
 [dependencies]
-# publik's usage counts (src/publik_telemetry.rs): the HTTP client that file needs.
-ureq = "2"
+# The publik module (pinned in the root Cargo.toml): Sign in with publik at start-up (`src/publik.rs`),
+# usage counting, and the AI pay choice.
+craft-publik = { workspace = true }
 filmcraft-engine = { workspace = true }
 filmcraft-export = { workspace = true }
 filmcraft-project = { workspace = true }
