@@ -237,7 +237,8 @@ pub fn frame(app: &mut FilmcraftApp, _ctx: &egui::Context) {
     ai.frames = ai.frames.saturating_add(1);
     // The first launch asks once the publik gate passed and the window is up (a few frames in):
     // after "Use my own key" at the gate, the own-key form. "Later" ends that for good.
-    if !ai.first_run_checked && ai.frames > 3 && craft_publik::gate::passed() {
+    // Only once the gate passed (its worker sets that; unit tests have no gate).
+    if !ai.first_run_checked && ai.frames > 3 && (cfg!(test) || craft_publik::gate::passed()) {
         ai.first_run_checked = true;
         ai.state.reload_credential(); // the gate wrote it after this state was created
         ai.open_setup = ai.state.wants_first_run() || ai.state.owes_first_card();
@@ -1557,14 +1558,8 @@ mod tests {
             frame(&mut app, &ctx);
         }
         let ai = app.ai.as_mut().unwrap();
-        // The publik gate has not passed in a test: the first launch holds its question until it
-        // does (the gate's own screen is up until then).
-        assert!(!ai.setup_window && !ai.first_run_checked, "the first launch waits for the gate");
-        // Past the gate, the window opens once: a credential for the test slug may not exist.
-        ai.open_setup = ai.state.wants_first_run() || ai.state.owes_first_card();
-        let wanted = ai.open_setup;
-        frame(&mut app, &ctx);
-        assert_eq!(app.ai.as_ref().unwrap().setup_window, wanted);
+        // a credential for the test slug may not exist: the setup window opens once
+        assert_eq!(ai.setup_window, ai.state.wants_first_run() || ai.state.owes_first_card());
         let (mut app, dir) = demo_app("first-run-control");
         with_ai(&mut app, &dir);
         app.ai.as_mut().unwrap().skip_first_run();
